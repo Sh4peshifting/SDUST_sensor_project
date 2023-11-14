@@ -35,6 +35,7 @@ def read_m701_data(serial_port):
     return data
 
 def display_data(stdscr, data):
+    warnings = []
     stdscr.clear()
     stdscr.addstr(0, 0, "CO2含量: {} ppm".format(data['eCO2']))
     stdscr.addstr(1, 0, "CH2O含量: {} ug/m3".format(data['eCH2O']))
@@ -45,7 +46,11 @@ def display_data(stdscr, data):
     stdscr.addstr(6, 0, "湿度: {} %".format(data['Humidity']))
     for i, (key, value) in enumerate(data.items()):
         if value > thresholds[key]:
-            stdscr.addstr(7, 0, f'警告：{key}数值超过阈值！')
+            warnings.append(key)
+    if len(warnings) > 0:
+            stdscr.addstr(7, 0, f'警告：{", ".join(warnings)}超过阈值')
+    else:
+        stdscr.addstr(7, 0, '空气指标正常')
     stdscr.refresh()
 
 def handle_input(stdscr, data):
@@ -54,6 +59,7 @@ def handle_input(stdscr, data):
         # 暂停数据接收，设置阈值
         selected = 0
         while True:
+            stdscr.clear()
             for i, key in enumerate(data.keys()):
                 if i == selected:
                     stdscr.addstr(i, 0, "{}: {} ".format(key, data[key]), curses.A_REVERSE)
@@ -71,19 +77,35 @@ def handle_input(stdscr, data):
                     if key == list(data.keys())[selected]:
                         stdscr.addstr(8, 0, "{} 阈值: ".format(key))
                         stdscr.refresh()
-                        threshold = stdscr.getstr()
-                        thresholds[key] = int(threshold)
-                        break
+                        threshold = ''
+                        while True:
+                            c = stdscr.getch()
+                            if c == curses.KEY_ENTER or c == 10 or c == 13:
+                                if len(threshold) <= 4:
+                                    thresholds[key] = int(threshold)
+                                    break
+                            elif c >= ord('0') and c <= ord('9'):
+                                if len(threshold) < 4:
+                                    threshold += chr(c)
+                                    stdscr.addstr(8, len("{} 阈值: ".format(key)) + len(threshold), chr(c))
+                                    stdscr.refresh()
+
+                break
+            elif c == 27:  # esc键
                 break
 
 def main(stdscr):
-    while True:
-        # 读取串口数据
-        data = read_m701_data(ser)
-        # 显示数据
-        display_data(stdscr, data)
-        # 处理键盘输入
-        handle_input(stdscr, thresholds)
-
+    try:
+        while True:
+            # 读取串口数据
+            data = read_m701_data(ser)
+            if data :
+                # 显示数据
+                display_data(stdscr, data)
+            # 处理键盘输入
+            handle_input(stdscr, thresholds)
+            time.sleep(0.5)
+    except Exception as e:
+        print(f"Error: {e}")
 if __name__ == '__main__':
     curses.wrapper(main)
