@@ -12,6 +12,8 @@ def read_m701_data(serial_port):
     # Read response
     response = serial_port.read(17)
 
+    data = {'eCO2': 0, 'eCH2O': 0, 'TVOC': 0, 'PM2.5': 0, 'PM10': 0, 'Temperature': 0, 'Humidity': 0}
+    
     # Check if the response has the expected length
     if len(response) != 17:
         print("Invalid response length")
