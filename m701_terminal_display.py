@@ -12,8 +12,6 @@ def read_m701_data(serial_port):
     # Read response
     response = serial_port.read(17)
 
-    data = {'eCO2': 0, 'eCH2O': 0, 'TVOC': 0, 'PM2.5': 0, 'PM10': 0, 'Temperature': 0, 'Humidity': 0}
-    
     # Check if the response has the expected length
     if len(response) != 17:
         print("Invalid response length")
@@ -44,6 +42,11 @@ def read_m701_data(serial_port):
 def display_data(stdscr, data):
     warnings = []
     stdscr.clear()
+    if data is None:
+        stdscr.clear()
+        stdscr.addstr(0, 0, "数据读取中，按任意按键刷新")
+        stdscr.refresh()
+        return
     stdscr.addstr(0, 0, "CO2含量: {} ppm".format(data['eCO2']))
     stdscr.addstr(1, 0, "CH2O含量: {} ug/m3".format(data['eCH2O']))
     stdscr.addstr(2, 0, "TVOC含量: {} ug/m3".format(data['TVOC']))
