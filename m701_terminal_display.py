@@ -12,6 +12,11 @@ def read_m701_data(serial_port):
     # Read response
     response = serial_port.read(17)
 
+    # Check if the response has the expected length
+    if len(response) != 17:
+        print("Invalid response length")
+        return None
+
     # Verify frame header
     if response[0] != 0x3C or response[1] != 0x02:
         print("Invalid frame header")
