@@ -8,9 +8,10 @@ ser = serial.Serial('/dev/ttyS4', 9600, timeout=1)
 # 初始化阈值
 thresholds = {'eCO2': 4000, 'eCH2O': 15, 'TVOC': 20, 'PM2.5': 50, 'PM10': 70, 'Temperature': 25, 'Humidity': 35}
 
+
 def read_m701_data(serial_port):
     # Read response
-    response = {}
+    response = [0 for _ in range(17)]  
     response = serial_port.read(17)
 
     # Verify frame header
