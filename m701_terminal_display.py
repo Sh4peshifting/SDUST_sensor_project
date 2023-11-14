@@ -56,9 +56,10 @@ def handle_input(stdscr, data):
         while True:
             for i, key in enumerate(data.keys()):
                 if i == selected:
-                    stdscr.addstr(i, 0, "{}: {} (按回车设置阈值)".format(key, data[key]), curses.A_REVERSE)
+                    stdscr.addstr(i, 0, "{}: {} ".format(key, data[key]), curses.A_REVERSE)
                 else:
-                    stdscr.addstr(i, 0, "{}: {} (按回车设置阈值)".format(key, data[key]))
+                    stdscr.addstr(i, 0, "{}: {} ".format(key, data[key]))
+            stdscr.addstr(7, 0, "按上下键选择阈值，按回车确认")
             stdscr.refresh()
             c = stdscr.getch()
             if c == curses.KEY_UP:
@@ -68,7 +69,7 @@ def handle_input(stdscr, data):
             elif c == curses.KEY_ENTER or c == 10 or c == 13:
                 for key in data.keys():
                     if key == list(data.keys())[selected]:
-                        stdscr.addstr(i, 0, "{} 阈值: ".format(key))
+                        stdscr.addstr(8, 0, "{} 阈值: ".format(key))
                         stdscr.refresh()
                         threshold = stdscr.getstr()
                         thresholds[key] = int(threshold)
@@ -82,7 +83,7 @@ def main(stdscr):
         # 显示数据
         display_data(stdscr, data)
         # 处理键盘输入
-        handle_input(stdscr, data)
+        handle_input(stdscr, thresholds)
 
 if __name__ == '__main__':
     curses.wrapper(main)
