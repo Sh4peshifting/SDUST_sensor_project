@@ -8,10 +8,8 @@ ser = serial.Serial('/dev/ttyS4', 9600, timeout=1)
 # 初始化阈值
 thresholds = {'eCO2': 4000, 'eCH2O': 15, 'TVOC': 20, 'PM2.5': 50, 'PM10': 70, 'Temperature': 25, 'Humidity': 35}
 
-
 def read_m701_data(serial_port):
     # Read response
-    response = [0 for _ in range(17)]  
     response = serial_port.read(17)
 
     # Verify frame header
@@ -35,14 +33,6 @@ def read_m701_data(serial_port):
         return None
 
     return data
-
-
-def create_curses_gui():
-    stdscr = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    stdscr.keypad(True)
-    return stdscr
 
 def display_data(stdscr, data):
     warnings = []
@@ -105,16 +95,13 @@ def handle_input(stdscr, data):
                 break
 
 def main(stdscr):
-    stdscr = create_curses_gui()
     while True:
         # 读取串口数据
         data = read_m701_data(ser)
-        if data :
-            # 显示数据
-            display_data(stdscr, data)
+        # 显示数据
+        display_data(stdscr, data)
         # 处理键盘输入
         handle_input(stdscr, thresholds)
-        time.sleep(0.5)
 
 if __name__ == '__main__':
     curses.wrapper(main)
