@@ -3,7 +3,7 @@ import time
 import curses
 
 # 初始化串口
-ser = serial.Serial('/dev/ttyS0', 9600, timeout=1)
+ser = serial.Serial('/dev/ttyS4', 9600, timeout=1)
 
 # 初始化阈值
 thresholds = {'eCO2': 4000, 'eCH2O': 15, 'TVOC': 20, 'PM2.5': 50, 'PM10': 70, 'Temperature': 25, 'Humidity': 35}
