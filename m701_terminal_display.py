@@ -2,6 +2,10 @@ import serial
 import time
 import curses
 
+# 初始化串口
+ser = serial.Serial('/dev/ttyS0', 9600, timeout=1)
+
+# 初始化阈值
 thresholds = {'eCO2': 4000, 'eCH2O': 15, 'TVOC': 20, 'PM2.5': 50, 'PM10': 70, 'Temperature': 25, 'Humidity': 35}
 
 def read_m701_data(serial_port):
@@ -30,53 +34,55 @@ def read_m701_data(serial_port):
 
     return data
 
-def display_data(window, data):
-    window.clear()
+def display_data(stdscr, data):
+    stdscr.clear()
+    stdscr.addstr(0, 0, "CO2含量: {} ppm".format(data['eCO2']))
+    stdscr.addstr(1, 0, "CH2O含量: {} ug/m3".format(data['eCH2O']))
+    stdscr.addstr(2, 0, "TVOC含量: {} ug/m3".format(data['TVOC']))
+    stdscr.addstr(3, 0, "PM2.5含量: {} ug/m3".format(data['PM2.5']))
+    stdscr.addstr(4, 0, "PM10含量: {} ug/m3".format(data['PM10']))
+    stdscr.addstr(5, 0, "温度: {} ℃".format(data['Temperature']))
+    stdscr.addstr(6, 0, "湿度: {} %".format(data['Humidity']))
     for i, (key, value) in enumerate(data.items()):
-        window.addstr(i, 0, f'{key}: {value}')
         if value > thresholds[key]:
-            window.addstr(len(data), 0, f'警告：{key}数值超过阈值！')
-    window.refresh()
+            stdscr.addstr(7, 0, f'警告：{key}数值超过阈值！')
+    stdscr.refresh()
 
-def set_threshold(window):
-    global thresholds
-    keys = list(thresholds.keys())
-    current = 0
+def handle_input(stdscr, data):
+    c = stdscr.getch()
+    if c == ord('i'):
+        # 暂停数据接收，设置阈值
+        selected = 0
+        while True:
+            for i, key in enumerate(data.keys()):
+                if i == selected:
+                    stdscr.addstr(i, 0, "{}: {} (按回车设置阈值)".format(key, data[key]), curses.A_REVERSE)
+                else:
+                    stdscr.addstr(i, 0, "{}: {} (按回车设置阈值)".format(key, data[key]))
+            stdscr.refresh()
+            c = stdscr.getch()
+            if c == curses.KEY_UP:
+                selected = (selected - 1) % len(data)
+            elif c == curses.KEY_DOWN:
+                selected = (selected + 1) % len(data)
+            elif c == curses.KEY_ENTER or c == 10 or c == 13:
+                for key in data.keys():
+                    if key == list(data.keys())[selected]:
+                        stdscr.addstr(i, 0, "{} 阈值: ".format(key))
+                        stdscr.refresh()
+                        threshold = stdscr.getstr()
+                        thresholds[key] = int(threshold)
+                        break
+                break
+
+def main(stdscr):
     while True:
-        window.clear()
-        for i, key in enumerate(keys):
-            if i == current:
-                window.addstr(i, 0, f'{key}: {thresholds[key]}', curses.A_REVERSE)
-            else:
-                window.addstr(i, 0, f'{key}: {thresholds[key]}')
-        window.refresh()
-        c = window.getch()
-        if c == curses.KEY_UP:
-            current = (current - 1) % len(keys)
-        elif c == curses.KEY_DOWN:
-            current = (current + 1) % len(keys)
-        elif c == ord('\n'):
-            window.addstr(len(keys), 0, '输入新的阈值：')
-            window.refresh()
-            curses.echo()
-            thresholds[keys[current]] = int(window.getstr(len(keys), 0))
-            curses.noecho()
-            break
-
-def main():
-    serial_port = serial.Serial('/dev/ttyS4', 9600, timeout=1)
-    window = curses.initscr()
-    curses.noecho()
-    window.keypad(True)
-    while True:
-        data = read_m701_data(serial_port)
-        if data is not None:
-            display_data(window, data)
-        c = window.getch()
-        if c == ord('i'):
-            set_threshold(window)
-    curses.endwin()
-
+        # 读取串口数据
+        data = read_m701_data(ser)
+        # 显示数据
+        display_data(stdscr, data)
+        # 处理键盘输入
+        handle_input(stdscr, data)
 
 if __name__ == '__main__':
-    main()
+    curses.wrapper(main)
