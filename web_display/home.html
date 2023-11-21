@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Monitor</title>
+    <meta charset="UTF-8">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
     $(document).ready(function(){
@@ -36,7 +37,7 @@
         <label for="{{ key }}">{{ key }}</label>
         <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}">
         {% endfor %}
-        <input type="submit" value="Update">
+        <input type="submit" value="更新">
     </form>
 </body>
 </html>
