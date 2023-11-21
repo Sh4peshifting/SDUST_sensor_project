@@ -43,7 +43,7 @@ def display_data(stdscr, data):
     stdscr.clear()
     if data is None:
         stdscr.clear()
-        stdscr.addstr(0, 0, "数据读取中，按任意按键刷新")
+        stdscr.addstr(0, 0, "数据读取中...")
         stdscr.refresh()
         return
     stdscr.addstr(0, 0, "CO2含量: {} ppm".format(data['eCO2']))
@@ -100,7 +100,8 @@ def handle_input(stdscr, data):
                                     threshold += chr(c)
                                     stdscr.addstr(8, len("{} 阈值: ".format(key)) + len(threshold), chr(c))
                                     stdscr.refresh()
-
+                            elif c == 27:  # esc键
+                                break
                 break
             elif c == 27:  # esc键
                 break
