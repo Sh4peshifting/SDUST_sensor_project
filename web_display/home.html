@@ -2,6 +2,24 @@
 <html>
 <head>
     <title>Monitor</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function(){
+        setInterval(function(){
+            $.get("/data", function(data, status){
+                // Clear the table
+                $("table").empty();
+                // Add new data to the table
+                for (var key in data) {
+                    var value = data[key];
+                    var warning = value > thresholds[key] ? 'Warning' : '';
+                    var row = '<tr><td>' + key + '</td><td>' + value + '</td><td>' + warning + '</td></tr>';
+                    $("table").append(row);
+                }
+            });
+        }, 1000); // Update every second
+    });
+    </script>
 </head>
 <body>
     <table>
