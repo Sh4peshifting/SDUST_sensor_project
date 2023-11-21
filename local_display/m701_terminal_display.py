@@ -1,5 +1,4 @@
 import serial
-import time
 import curses
 
 # 初始化串口
@@ -64,7 +63,9 @@ def display_data(stdscr, data):
     stdscr.refresh()
 
 def handle_input(stdscr, data):
+    stdscr.nodelay(True)  # 非阻塞模式
     c = stdscr.getch()
+    stdscr.nodelay(False)  # 恢复阻塞模式
     if c == ord('i'):
         # 暂停数据接收，设置阈值
         selected = 0
@@ -112,6 +113,7 @@ def main(stdscr):
         display_data(stdscr, data)
         # 处理键盘输入
         handle_input(stdscr, thresholds)
+        curses.napms(100)  # 延迟100毫秒
 
 if __name__ == '__main__':
     curses.wrapper(main)
