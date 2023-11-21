@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monitor</title>
+</head>
+<body>
+    <table>
+        {% for key, value in data.items() %}
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+            <td>{{ 'Warning' if warnings[key] else '' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <form method="POST">
+        {% for key, value in thresholds.items() %}
+        <label for="{{ key }}">{{ key }}</label>
+        <input type="number" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+        {% endfor %}
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>
