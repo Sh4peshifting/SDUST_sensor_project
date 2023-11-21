@@ -1,31 +1,38 @@
 import serial
-import time
-from flask import Flask, render_template, request
+import threading
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
 # Global variable to store the data
-data = {}
+data = {'CO2含量(ppm):': 0, 'CH2O含量(ug/m3）:': 0, 'TVOC含量(ug/m3):': 0, 'PM2.5含量(ug/m3):': 0, 'PM10含量(ug/m3):': 0, '温度(℃):': 0, '湿度(%):': 0}
 
 # Threshold values
-thresholds = {'eCO2': 1000, 'eCH2O': 0.1, 'TVOC': 0.5, 'PM2.5': 35, 'PM10': 50, 'Temperature': 30, 'Humidity': 60}
+thresholds = {'CO2阈值(ppm):': 1000, 'CH2O阈值(ug/m3）:': 0.1, 'TVOC阈值(ug/m3):': 0.5, 'PM2.5阈值(ug/m3):': 35, 'PM10阈值(ug/m3):': 50, '温度阈值(℃):': 30, '湿度阈值(%):': 60}
 
 def read_m701_data(serial_port):
+    global data
+
     # Read response
     response = serial_port.read(17)
+
+    # Check if the response has the expected length
+    if len(response) != 17:
+        print("Invalid response length")
+        return data
 
     # Verify frame header
     if response[0] != 0x3C or response[1] != 0x02:
         print("Invalid frame header")
         return None
-
+    
     # Parse response
-    data = {'eCO2': int.from_bytes(response[2:4], byteorder='big'),
-            'eCH2O': int.from_bytes(response[4:6], byteorder='big'),
-            'TVOC': int.from_bytes(response[6:8], byteorder='big'),
-            'PM2.5': int.from_bytes(response[8:10], byteorder='big'),
-            'PM10': int.from_bytes(response[10:12], byteorder='big'), 'Temperature': response[12] + response[13] / 10,
-            'Humidity': response[14] + response[15] / 10}
+    data = {'CO2含量(ppm):': int.from_bytes(response[2:4], byteorder='big'),
+            'CH2O含量(ug/m3）:': int.from_bytes(response[4:6], byteorder='big'),
+            'TVOC含量(ug/m3):': int.from_bytes(response[6:8], byteorder='big'),
+            'PM2.5含量(ug/m3):': int.from_bytes(response[8:10], byteorder='big'),
+            'PM10含量(ug/m3):': int.from_bytes(response[10:12], byteorder='big'), '温度(℃):': response[12] + response[13] / 10,
+            '湿度(%):': response[14] + response[15] / 10}
 
     # Verify checksum
     checksum = sum(response[:-1]) & 0xFF
@@ -34,6 +41,17 @@ def read_m701_data(serial_port):
         return None
 
     return data
+
+def read_data():
+    serial_port = serial.Serial('/dev/ttyS4', 9600, timeout=1)
+    while True:
+        global data
+        data = read_m701_data(serial_port)
+
+@app.route('/data', methods=['GET'])
+def get_data():
+    global data
+    return jsonify(data)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -46,20 +64,7 @@ def home():
     warnings = {key: value > thresholds[key] for key, value in data.items()}
     return render_template('home.html', data=data, warnings=warnings, thresholds=thresholds)
 
-def main():
-    # Configure serial port
-    serial_port = serial.Serial('/dev/ttyS4', 9600, timeout=1)
-
-    while True:
-        try:
-            data = read_m701_data(serial_port)
-            if data:
-                print(data)
-            time.sleep(1)
-        except Exception as e:
-            print(f"Error: {e}")
-            time.sleep(1)
-
 if __name__ == '__main__':
-    main()
-    app.run(debug=True)
+    # Start a new thread for data reading
+    threading.Thread(target=read_data).start()
+    app.run(host='0.0.0.0', port=5000)
