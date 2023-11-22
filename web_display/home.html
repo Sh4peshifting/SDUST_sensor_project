@@ -7,15 +7,14 @@
     <script>
     $(document).ready(function(){
         setInterval(function(){
-            $.get("/data", function(data, status){
-                // Clear the table
-                $("table").empty();
-                // Add new data to the table
+            $.get("/data", function(data){
+                // Update the table
                 for (var key in data) {
                     var value = data[key];
                     var warning = value > thresholds[key] ? 'Warning' : '';
-                    var row = '<tr><td>' + key + '</td><td>' + value + '</td><td>' + warning + '</td></tr>';
-                    $("table").append(row);
+                    // Update value and warning
+                    $("#" + key + "_value").text(value);
+                    $("#" + key + "_warning").text(warning);
                 }
             });
         }, 1000); // Update every second
@@ -27,8 +26,8 @@
         {% for key, value in data.items() %}
         <tr>
             <td>{{ key }}</td>
-            <td>{{ value }}</td>
-            <td>{{ 'Warning' if warnings[key] else '' }}</td>
+            <td id="{{ key }}_value">{{ value }}</td>
+            <td id="{{ key }}_warning">{{ 'Warning' if warnings[key] else '' }}</td>
         </tr>
         {% endfor %}
     </table>
