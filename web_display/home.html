@@ -8,14 +8,19 @@
     $(document).ready(function(){
         setInterval(function(){
             $.get("/data", function(data){
-                // Update the table
-                for (var key in data) {
-                    var value = data[key];
-                    var warning = value > thresholds[key] ? 'Warning' : '';
-                    // Update value and warning
-                    $("#" + key + "_value").text(value);
-                    $("#" + key + "_warning").text(warning);
-                }
+                // Get all rows
+                var rows = $("table tr");
+                // Iterate over each row
+                rows.each(function(){
+                    // Get the key from the first cell
+                    var key = $(this).find("td").eq(0).text();
+                    // Get new data and warning based on the key
+                    var newData = data[key];
+                    var newWarning = newData > thresholds[key] ? 'Warning' : '';
+                    // Set new data and warning
+                    $(this).find("td").eq(1).text(newData);
+                    $(this).find("td").eq(2).text(newWarning);
+                });
             });
         }, 1000); // Update every second
     });
@@ -26,8 +31,8 @@
         {% for key, value in data.items() %}
         <tr>
             <td>{{ key }}</td>
-            <td id="{{ key }}_value">{{ value }}</td>
-            <td id="{{ key }}_warning">{{ 'Warning' if warnings[key] else '' }}</td>
+            <td>{{ value }}</td>
+            <td>{{ 'Warning' if warnings[key] else '' }}</td>
         </tr>
         {% endfor %}
     </table>
