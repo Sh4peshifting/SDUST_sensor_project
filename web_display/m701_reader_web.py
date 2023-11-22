@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 # Global variable to store the data
 data = {'CO2(ppm):': 0, 'CH2O(ug/m3):': 0, 'TVOC(ug/m3):': 0, 'PM2.5(ug/m3):': 0, 'PM10(ug/m3):': 0, '温度(℃):': 0, '湿度(%):': 0}
+warnings = {}
 
 # Threshold values
 thresholds = {'CO2(ppm):': 1000, 'CH2O(ug/m3):': 0.1, 'TVOC(ug/m3):': 0.5, 'PM2.5(ug/m3):': 35, 'PM10(ug/m3):': 50, '温度(℃):': 30, '湿度(%):': 60}
@@ -50,12 +51,12 @@ def read_data():
 
 @app.route('/data', methods=['GET'])
 def get_data():
-    global data
-    return jsonify(data)
+    global data, warnings
+    return jsonify(data=data, warnings=warnings)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    global thresholds
+    global thresholds, warnings
     if request.method == 'POST':
         # Update thresholds
         for key in thresholds.keys():
