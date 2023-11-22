@@ -14,9 +14,9 @@
                     // 清空表格
                     $('table').empty();
                     // 使用新的数据填充表格
-                    for (var key in data) {
-                        $('table').append('<tr><td>' + key + '</td><td>' + data[key] + '</td><td>' + (warnings[key] ? 'Warning' : '') + '</td></tr>');
-                    }
+                    $.each(data, function(key, value) {
+                        $('table').append('<tr><td>' + key + '</td><td>' + value + '</td><td>' + (warnings[key] ? 'Warning' : '') + '</td></tr>');
+                    });
                 }
             });
         }
