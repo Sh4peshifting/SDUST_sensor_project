@@ -5,10 +5,10 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
 # Global variable to store the data
-data = {'CO2含量(ppm):': 0, 'CH2O含量(ug/m3）:': 0, 'TVOC含量(ug/m3):': 0, 'PM2.5含量(ug/m3):': 0, 'PM10含量(ug/m3):': 0, '温度(℃):': 0, '湿度(%):': 0}
+data = {'CO2(ppm):': 0, 'CH2O(ug/m3):': 0, 'TVOC(ug/m3):': 0, 'PM2.5(ug/m3):': 0, 'PM10(ug/m3):': 0, '温度(℃):': 0, '湿度(%):': 0}
 
 # Threshold values
-thresholds = {'CO2阈值(ppm):': 1000, 'CH2O阈值(ug/m3）:': 0.1, 'TVOC阈值(ug/m3):': 0.5, 'PM2.5阈值(ug/m3):': 35, 'PM10阈值(ug/m3):': 50, '温度阈值(℃):': 30, '湿度阈值(%):': 60}
+thresholds = {'CO2(ppm):': 1000, 'CH2O(ug/m3):': 0.1, 'TVOC(ug/m3):': 0.5, 'PM2.5(ug/m3):': 35, 'PM10(ug/m3):': 50, '温度(℃):': 30, '湿度(%):': 60}
 
 def read_m701_data(serial_port):
     global data
@@ -27,11 +27,11 @@ def read_m701_data(serial_port):
         return None
     
     # Parse response
-    data = {'CO2含量(ppm):': int.from_bytes(response[2:4], byteorder='big'),
-            'CH2O含量(ug/m3）:': int.from_bytes(response[4:6], byteorder='big'),
-            'TVOC含量(ug/m3):': int.from_bytes(response[6:8], byteorder='big'),
-            'PM2.5含量(ug/m3):': int.from_bytes(response[8:10], byteorder='big'),
-            'PM10含量(ug/m3):': int.from_bytes(response[10:12], byteorder='big'), '温度(℃):': response[12] + response[13] / 10,
+    data = {'CO2(ppm):': int.from_bytes(response[2:4], byteorder='big'),
+            'CH2O(ug/m3):': int.from_bytes(response[4:6], byteorder='big'),
+            'TVOC(ug/m3):': int.from_bytes(response[6:8], byteorder='big'),
+            'PM2.5(ug/m3):': int.from_bytes(response[8:10], byteorder='big'),
+            'PM10(ug/m3):': int.from_bytes(response[10:12], byteorder='big'), '温度(℃):': response[12] + response[13] / 10,
             '湿度(%):': response[14] + response[15] / 10}
 
     # Verify checksum
@@ -67,4 +67,4 @@ def home():
 if __name__ == '__main__':
     # Start a new thread for data reading
     threading.Thread(target=read_data).start()
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
