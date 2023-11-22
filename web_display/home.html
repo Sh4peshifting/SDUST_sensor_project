@@ -5,15 +5,14 @@
     <meta charset="UTF-8">
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.5.1.min.js"></script>
     <script>
-        // 在这里定义一个函数，用于从服务器获取新的数据并更新表格
         function updateTable() {
             $.ajax({
-                url: '/data', // 你的API的URL
+                url: '/data', 
                 type: 'GET',
-                success: function(data) {
-                    // 清空表格
+                success: function(receivedData) {
+                    var data = receivedData.data;
+                    var warnings = receivedData.warnings;
                     $('table').empty();
-                    // 使用新的数据填充表格
                     $.each(data, function(key, value) {
                         $('table').append('<tr><td>' + key + '</td><td>' + value + '</td><td>' + (warnings[key] ? 'Warning' : '') + '</td></tr>');
                     });
@@ -21,7 +20,6 @@
             });
         }
 
-        // 使用setInterval函数每隔一段时间（例如5秒）执行一次updateTable函数
         setInterval(updateTable, 1000);
     </script>
 </head>
