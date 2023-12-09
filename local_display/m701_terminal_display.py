@@ -13,7 +13,6 @@ def read_m701_data(serial_port):
 
     # Check if the response has the expected length
     if len(response) != 17:
-        print("Invalid response length")
         return None
 
     # Verify frame header
@@ -40,17 +39,16 @@ def read_m701_data(serial_port):
 
 def display_data(stdscr, data):
     warnings = []
-    stdscr.clear()
     if data is None:
-        stdscr.clear()
-        stdscr.addstr(0, 0, "数据读取中...")
+        stdscr.addstr(8, 0, "数据读取中...")
         stdscr.refresh()
         return
+    stdscr.clear()
     stdscr.addstr(0, 0, "CO2含量: {} ppm".format(data['eCO2']))
     stdscr.addstr(1, 0, "CH2O含量: {} ug/m3".format(data['eCH2O']))
     stdscr.addstr(2, 0, "TVOC含量: {} ug/m3".format(data['TVOC']))
-    stdscr.addstr(3, 0, "PM2.5含量: {} ug/m3".format(data['PM2.5']))
-    stdscr.addstr(4, 0, "PM10含量: {} ug/m3".format(data['PM10']))
+    stdscr.addstr(3, 0, "PM2.5含量: {} ppm".format(data['PM2.5']))
+    stdscr.addstr(4, 0, "PM10含量: {} ppm".format(data['PM10']))
     stdscr.addstr(5, 0, "温度: {} ℃".format(data['Temperature']))
     stdscr.addstr(6, 0, "湿度: {} %".format(data['Humidity']))
     for i, (key, value) in enumerate(data.items()):
